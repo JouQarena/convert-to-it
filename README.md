@@ -128,4 +128,18 @@ npm run dist:win    # أو dist:mac / dist:linux
 ```
 (محتاج Node 20+ و7-Zip على الويندوز)
 
+---
+
+## لو الـbuild فشل
+
+- **التحذيرات اللي في Actions (Node.js 20 is deprecated, macOS queue times)**
+  مش أخطاء — دي ملاحظات من GitHub نفسه، والبناء بيكمل عادي. الغلط بيبقى سطر
+  أحمر مكتوب جنبه **✕**.
+- **فشل في خطوة «Fetch the offline web app» على ويندوز بس:** السكربت بينزّل نسخة
+  convert.to.it ويفكّ ضغطها. أي تعديل عليه لازم يرفع فولدر `scripts` تاني
+  (اسحب الفولدر كله لمنطقة الرفع → Commit).
+- **فشل في خطوة «Build the desktop app» وبيتكلم عن الأيقونة:** امسح سطر
+  `"icon": "build/icon.ico"` من `package.json` (من غير أيقونة مخصصة) وارفعه تاني.
+- **عايز تشوف اللوج بالتفصيل:** Actions → الـrun → دوس على اسم الخطوة الفاشلة.
+
 **التفاصيل التقنية:** [`README-TECHNICAL.md`](README-TECHNICAL.md)

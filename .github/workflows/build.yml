@@ -95,6 +95,9 @@ jobs:
       - name: Create or refresh the rolling release
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # This job does not check out the repository, so the gh CLI cannot
+          # infer the repo from a git remote — tell it explicitly.
+          GH_REPO: ${{ github.repository }}
         run: |
           set -euo pipefail
           cd artifacts
@@ -111,3 +114,6 @@ jobs:
           versions install in the background when you close the app." \
             || true
           gh release upload latest --clobber *
+          # Make sure GitHub keeps marking this release as "latest", which is
+          # what the app's auto-updater looks for.
+          gh release edit latest --latest || true
