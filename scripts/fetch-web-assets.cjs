@@ -90,19 +90,45 @@ function run(command, args, cwd) {
   execFileSync(command, args, { cwd, stdio: "inherit" });
 }
 
-function asarExtract(asarPath, destination) {
-  const localBin = path.join(
-    ROOT,
-    "node_modules",
-    ".bin",
-    process.platform === "win32" ? "asar.cmd" : "asar"
-  );
-  if (fs.existsSync(localBin)) {
-    run(localBin, ["extract", asarPath, destination], ROOT);
-    return;
+/**
+ * Unpacks the app.asar.
+ *
+ * Uses the @electron/asar Node API instead of shelling out to
+ * node_modules/.bin/asar: on Windows that shim is a .cmd file, and Node cannot
+ * spawn .cmd/.bat without a shell (which is exactly how the Windows build used
+ * to die here).
+ */
+async function asarExtract(asarPath, destination) {
+  const asar = require("@electron/asar");
+  await asar.extractAll(asarPath, destination);
+}
+
+/**
+ * Runs 7z, looking it up on PATH first and in the usual Windows install
+ * folders afterwards (GitHub runners ship 7-Zip, but its folder is not always
+ * on PATH).
+ */
+function run7z(args, cwd) {
+  const candidates = ["7z"];
+  if (process.platform === "win32") {
+    const programFiles = process.env["ProgramFiles"] || "C:\Program Files";
+    const programFilesX86 = process.env["ProgramFiles(x86)"] || "C:\Program Files (x86)";
+    candidates.push(path.join(programFiles, "7-Zip", "7z.exe"));
+    candidates.push(path.join(programFilesX86, "7-Zip", "7z.exe"));
   }
-  // Fall back to a one-off npx download of the asar tool.
-  run("npx", ["--yes", "@electron/asar", "extract", asarPath, destination], ROOT);
+  let lastError = null;
+  for (const binary of candidates) {
+    try {
+      execFileSync(binary, args, { cwd, stdio: "inherit" });
+      return;
+    } catch (error) {
+      // A missing binary is worth retrying with the next candidate; anything
+      // else (bad archive, wrong password, ...) is a real error.
+      if (error.code !== "ENOENT") throw error;
+      lastError = error;
+    }
+  }
+  throw lastError || new Error("7z executable not found");
 }
 
 function pickAsset(assets) {
@@ -138,10 +164,10 @@ function extractWindows(assetPath) {
   const step2 = path.join(UPSTREAM_DIR, "win-app");
   fs.rmSync(step1, { recursive: true, force: true });
   fs.rmSync(step2, { recursive: true, force: true });
-  run("7z", ["x", "-y", `-o${step1}`, assetPath], UPSTREAM_DIR);
+  run7z(["x", "-y", `-o${step1}`, assetPath], UPSTREAM_DIR);
   const inner = path.join(step1, "$PLUGINSDIR", "app-64.7z");
   if (!fs.existsSync(inner)) throw new Error(`app-64.7z not found in ${step1}`);
-  run("7z", ["x", "-y", `-o${step2}`, inner], UPSTREAM_DIR);
+  run7z(["x", "-y", `-o${step2}`, inner], UPSTREAM_DIR);
   const asar = path.join(step2, "resources", "app.asar");
   if (!fs.existsSync(asar)) throw new Error(`app.asar not found in ${step2}`);
   return asar;
@@ -191,7 +217,7 @@ function extractMac(assetPath) {
 
   const unpacked = path.join(UPSTREAM_DIR, "asar");
   fs.rmSync(unpacked, { recursive: true, force: true });
-  asarExtract(asarPath, unpacked);
+  await asarExtract(asarPath, unpacked);
 
   const dist = path.join(unpacked, "dist");
   if (!fs.existsSync(path.join(dist, "index.html"))) {
