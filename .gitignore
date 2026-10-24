@@ -1,0 +1,16 @@
+# dependencies
+node_modules/
+
+# downloaded upstream build + extracted web app (fetched at build time)
+web/
+upstream/
+
+# electron-builder output
+release/
+dist/
+
+# logs & os junk
+*.log
+npm-debug.log*
+.DS_Store
+Thumbs.db

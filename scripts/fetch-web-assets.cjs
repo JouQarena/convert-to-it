@@ -200,7 +200,9 @@ function extractMac(assetPath) {
 
   fs.rmSync(WEB_DIR, { recursive: true, force: true });
   fs.cpSync(dist, WEB_DIR, { recursive: true });
-  console.log(`[assets] web app ready in ${path.relative(ROOT, WEB_DIR)} (${dirSize(WEB_DIR)} MB)`);
+  console.log(
+    `[assets] web app ready in ${path.relative(ROOT, WEB_DIR)} (${(dirSize(WEB_DIR) / 1048576).toFixed(1)} MB)`
+  );
 
   // The downloaded build + unpacked archive are no longer needed.
   fs.rmSync(UPSTREAM_DIR, { recursive: true, force: true });

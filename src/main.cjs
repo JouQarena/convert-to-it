@@ -287,9 +287,14 @@ function buildMenu() {
               detail:
                 "A truly universal, private, on-device file converter.\n" +
                 "Every conversion happens locally on this computer.\n\n" +
+                "Original project: convert.to.it\n" +
+                "by PortalRunner (p2r3), licensed under GPL-2.0\n" +
+                "https://p2r3.github.io/convert/\n" +
+                "https://github.com/p2r3/convert\n\n" +
+                "This desktop edition only adds the packaging: file\n" +
+                "associations (Open with) and automatic updates.\n\n" +
                 `App version: ${app.getVersion()}\n` +
-                `Electron: ${process.versions.electron}\n` +
-                "Based on convert.to.it (p2r3/convert, GPL-2.0).",
+                `Electron: ${process.versions.electron}`,
               buttons: ["OK"],
             }),
         },

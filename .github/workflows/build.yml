@@ -1,0 +1,113 @@
+name: Build and publish desktop app
+
+# Builds the offline "Convert to it!" desktop app for Windows, macOS and Linux
+# and publishes everything to a single rolling release (tag `latest`).
+# The app checks that release on startup and updates itself in the background.
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main, master]
+  schedule:
+    - cron: "0 7 * * 1" # every Monday: pick up the newest upstream web app
+
+permissions:
+  contents: write
+
+concurrency:
+  group: rolling-release
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Build (${{ matrix.platform }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-2025
+            platform: win
+          - os: macos-15
+            platform: mac
+          - os: ubuntu-24.04
+            platform: linux
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Install 7-Zip (needed to unpack the upstream Windows build)
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y p7zip-full
+
+      - name: Install dependencies
+        run: npm ci
+
+      # Every build gets a higher version number so the installed apps see it
+      # as an update. The file names stay the same, so the rolling release is
+      # simply overwritten in place.
+      - name: Stamp the build version
+        run: npm pkg set version=1.0.${{ github.run_number }}
+
+      # Tell electron-updater which repository hosts the updates.
+      - name: Point the auto-updater at this repository
+        run: npm run feed -- ${{ github.repository }}
+
+      # Downloads the official offline build of convert.to.it for this
+      # platform and extracts its bundled web app into ./web
+      - name: Fetch the offline web app
+        run: npm run assets
+
+      - name: Build the desktop app
+        run: npx electron-builder --${{ matrix.platform }} --publish never
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: desktop-${{ matrix.platform }}
+          if-no-files-found: error
+          retention-days: 7
+          path: |
+            release/*.exe
+            release/*.dmg
+            release/*.AppImage
+            release/latest*.yml
+
+  publish:
+    name: Publish rolling release
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+          merge-multiple: true
+
+      - name: Create or refresh the rolling release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          cd artifacts
+          ls -1
+          gh release create latest \
+            --title "Convert to it! — offline desktop" \
+            --notes "Offline desktop build of convert.to.it (Windows / macOS / Linux).
+
+          Original project: convert.to.it by PortalRunner (p2r3), GPL-2.0
+          https://p2r3.github.io/convert/ · https://github.com/p2r3/convert
+
+          Every conversion runs locally on your machine — no internet needed.
+          The app updates itself from this release: just keep using it, new
+          versions install in the background when you close the app." \
+            || true
+          gh release upload latest --clobber *
