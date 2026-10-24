@@ -1,0 +1,208 @@
+{
+  "name": "convert-to-it-desktop",
+  "productName": "Convert to it",
+  "version": "1.0.0",
+  "description": "Offline desktop build of convert.to.it — universal, private, on-device file converter with \"Open with\" file associations and automatic updates",
+  "main": "src/main.cjs",
+  "desktopName": "com.p2r3.convert.desktop",
+  "license": "GPL-2.0-or-later",
+  "author": "Convert to it! desktop wrapper — bundles the offline web app of p2r3/convert (GPL-2.0)",
+  "homepage": "https://p2r3.github.io/convert/",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/OWNER/REPO.git"
+  },
+  "scripts": {
+    "start": "electron .",
+    "assets": "node scripts/fetch-web-assets.cjs",
+    "feed": "node scripts/configure-feed.cjs",
+    "icons": "node scripts/make-icons.cjs",
+    "dist": "npm run assets && electron-builder --publish never",
+    "dist:win": "npm run assets && electron-builder --win --publish never",
+    "dist:mac": "npm run assets && electron-builder --mac --publish never",
+    "dist:linux": "npm run assets && electron-builder --linux --publish never"
+  },
+  "dependencies": {
+    "electron-updater": "^6.6.2"
+  },
+  "devDependencies": {
+    "@electron/asar": "^3.2.9",
+    "electron": "^44.5.1",
+    "electron-builder": "^26.15.3"
+  },
+  "build": {
+    "appId": "com.p2r3.convert.desktop",
+    "productName": "Convert to it",
+    "executableName": "ConvertToIt",
+    "copyright": "GPL-2.0 — based on convert.to.it (p2r3/convert)",
+    "asar": true,
+    "compression": "normal",
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "src/**",
+      "web/**",
+      "package.json",
+      "!**/*.map",
+      "!node_modules/**/*.{md,ts,tsx,mjs,map}"
+    ],
+    "publish": [
+      {
+        "provider": "github",
+        "owner": "OWNER",
+        "repo": "REPO",
+        "releaseType": "release"
+      }
+    ],
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "icon": "build/icon.ico",
+      "artifactName": "Convert-to-it-Setup-x64.exe"
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true,
+      "allowElevation": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "Convert to it!"
+    },
+    "mac": {
+      "target": [
+        {
+          "target": "dmg",
+          "arch": [
+            "arm64"
+          ]
+        }
+      ],
+      "icon": "build/icon.icns",
+      "category": "public.app-category.utilities",
+      "artifactName": "Convert-to-it-arm64.dmg"
+    },
+    "linux": {
+      "target": [
+        {
+          "target": "AppImage",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "icon": "build/icons",
+      "category": "Utility",
+      "synopsis": "Truly universal, private, on-device file converter",
+      "syncDesktopName": true,
+      "artifactName": "Convert-to-it-x64.AppImage"
+    },
+    "fileAssociations": [
+      {
+        "ext": [
+          "png", "apng", "jpg", "jpeg", "jpe", "jfif", "gif", "webp", "avif", "avifs", "bmp", "dib",
+          "ico", "cur", "svg", "svgz", "tif", "tiff", "heic", "heif", "heics", "heifs", "psd", "psb",
+          "xcf", "kra", "tga", "icb", "vda", "vst", "vtp", "exr", "hdr", "rgbe", "jxl", "jp2", "j2k",
+          "jpf", "jpx", "jps", "jpo", "pns", "pnm", "pbm", "pgm", "ppm", "pam", "pcx", "xpm", "xbm",
+          "wbmp", "dds", "sgi", "bw", "ras", "ff", "farbfeld", "qoi", "pict", "pct", "pic", "arw",
+          "cr2", "cr3", "crw", "nef", "nrw", "orf", "rw2", "pef", "ptx", "dng", "erf", "kdc", "dcr",
+          "mrw", "raf", "raw", "sr2", "srf", "x3f", "3fr", "fff", "iiq", "mef", "mos"
+        ],
+        "name": "Convert to it Image",
+        "description": "Open with Convert to it! — universal offline file converter",
+        "mimeType": "image/*",
+        "role": "Editor"
+      },
+      {
+        "ext": [
+          "mp3", "mp2", "mpga", "wav", "wave", "flac", "oga", "ogg", "opus", "spx", "aac", "m4a",
+          "m4b", "m4r", "wma", "aiff", "aif", "aifc", "alac", "ape", "wv", "wvc", "amr", "awb",
+          "ac3", "eac3", "caf", "au", "snd", "mid", "midi", "kar", "rmi", "xm", "mod", "s3m", "it",
+          "mptm", "mtm", "mt2", "669", "far", "okt", "stm", "ult", "m15", "dsm", "amf", "gdm",
+          "imf", "med", "mdl", "mo3", "psm", "ptm", "umx", "dsf", "dff", "tta", "voc", "gsm", "ra",
+          "ram", "mpc", "mpp", "cda", "8svx", "iff", "sph", "nist", "pvf", "sd2", "txw",
+          "vox", "w64", "wve", "aa", "aax", "act", "aue", "dct", "dss", "dvf", "iklax", "ivs",
+          "m4p", "mmf", "msv", "nmf", "ogx", "paf", "qcp", "sds", "vb", "vqf"
+        ],
+        "name": "Convert to it Audio",
+        "description": "Open with Convert to it! — universal offline file converter",
+        "mimeType": "audio/*",
+        "role": "Editor"
+      },
+      {
+        "ext": [
+          "mp4", "m4v", "mov", "qt", "mkv", "mk3d", "mka", "webm", "avi", "wmv", "asf", "mpg",
+          "mpeg", "mpe", "mpv", "m1v", "m2v", "mp2v", "ts", "m2ts", "mts", "m2t", "tp", "trp",
+          "3gp", "3gpp", "3g2", "3gp2", "ogv", "ogm", "flv", "f4v", "f4p", "f4a", "f4b", "vob",
+          "ifo", "rmvb", "rm", "divx", "dv", "sdv", "hdv", "mxf", "gxf", "lxf", "wtv", "amv",
+          "nsv", "roq", "smk", "bik", "bk2", "fli", "flc", "gifv", "yuv"
+        ],
+        "name": "Convert to it Video",
+        "description": "Open with Convert to it! — universal offline file converter",
+        "mimeType": "video/*",
+        "role": "Editor"
+      },
+      {
+        "ext": [
+          "txt", "text", "log", "md", "markdown", "mkd", "mdown", "mdwn", "rst", "tex", "ltx",
+          "bib", "csv", "tsv", "tab", "psv", "json", "jsonl", "ndjson", "json5", "jsonc", "xml",
+          "yaml", "yml", "toml", "ini", "cfg", "conf", "config", "properties", "rtf", "doc", "docx",
+          "docm", "dot", "dotx", "odt", "ott", "fodt", "sxw", "pdf", "epub", "mobi", "prc", "azw",
+          "azw3", "azw4", "kfx", "fb2", "djvu", "djv", "ps", "eps", "epsf", "epsi", "ai", "pages",
+          "numbers", "key", "ppt", "pptx", "pptm", "pot", "potx", "odp", "otp", "fodp", "sxi",
+          "xls", "xlsx", "xlsm", "xlt", "xltx", "ods", "ots", "fods", "sxc", "eml", "mbox", "msg",
+          "ics", "ical", "vcf", "vcard", "ipynb", "parquet", "avro", "orc", "bson", "cbor", "db",
+          "db3", "sqlite", "sqlite3", "mdb", "accdb", "h5", "hdf5", "nc", "cdf", "mat", "pickle",
+          "pkl", "feather", "arrow", "geojson", "kml", "kmz", "gpx", "toon"
+        ],
+        "name": "Convert to it Document",
+        "description": "Open with Convert to it! — universal offline file converter",
+        "mimeType": "text/*;application/pdf;application/epub+zip;application/json;application/x-sqlite3;application/vnd.ms-excel;application/vnd.ms-powerpoint;application/vnd.openxmlformats-officedocument.wordprocessingml.document;application/vnd.oasis.opendocument.text;application/rtf;application/x-fictionbook+xml",
+        "role": "Editor"
+      },
+      {
+        "ext": [
+          "zip", "zipx", "tar", "gtar", "gz", "gzip", "tgz", "taz", "bz2", "bzip2", "tbz", "tbz2",
+          "xz", "lzma", "txz", "tlz", "zst", "zstd", "sz", "snappy", "br", "brotli", "lz", "lzip",
+          "lz4", "lzo", "lzop", "7z", "rar", "rar5", "cab", "arj", "lha", "lzh", "lza", "ace",
+          "cpio", "ar", "a", "deb", "udeb", "rpm", "pkg", "apk", "aab", "xapk", "ipa", "jar", "war",
+          "ear", "sar", "iso", "img", "cdr", "nrg", "mdf", "mds", "cue", "cdi", "isz", "z", "tz",
+          "zpaq", "arc", "sit", "sitx", "hqx", "bin", "uefi", "vhd", "vhdx", "vdi", "vmdk", "qcow",
+          "qcow2", "wim", "swm", "esd", "fat", "ext2", "ext3", "ext4", "squashfs", "cramfs",
+          "romfs", "initrd"
+        ],
+        "name": "Convert to it Archive",
+        "description": "Open with Convert to it! — universal offline file converter",
+        "mimeType": "application/zip;application/x-7z-compressed;application/x-tar;application/gzip;application/x-bzip2;application/x-xz;application/vnd.rar;application/zstd;application/java-archive;application/vnd.android.package-archive",
+        "role": "Editor"
+      },
+      {
+        "ext": [
+          "ttf", "ttc", "otf", "otc", "woff", "woff2", "eot", "pfa", "pfb", "pfm", "afm", "bdf",
+          "pcf", "psf", "psfu", "snf", "fnt", "fon", "pfr", "t42", "cff", "ufo", "glyphs", "sfd",
+          "vfb", "etx", "chr",
+          "obj", "mtl", "stl", "stla", "stlb", "3mf", "ply", "pcd", "xyz", "pts", "ptx", "asc",
+          "fbx", "gltf", "glb", "vrm", "vrma", "dae", "zae", "3ds", "prj", "blend", "max", "ma",
+          "mb", "usd", "usda", "usdc", "usdz", "vrml", "wrl", "wrz", "x3d", "x3dz", "x3db", "x3dv",
+          "off", "noff", "coff", "lwo", "lw", "lws", "cob", "scn", "md2", "md3", "ms3d", "nff",
+          "smf", "ter", "abc", "b3dm", "czml",
+          "musicxml", "mxl", "mei", "abc2", "sib", "mus", "musx", "niff", "sco", "ly", "ily",
+          "gtp", "gp", "gp3", "gp4", "gp5", "gpx", "ptb", "tef", "tg", "crd",
+          "srt", "vtt", "ssa", "ass", "sub", "idx", "sup", "usf", "ttxt", "smi", "rt", "pjs",
+          "mpl", "sbv", "lrc", "elrc", "qrc", "srv3", "ttml", "dfxp", "itt", "scc", "cap"
+        ],
+        "name": "Convert to it File",
+        "description": "Open with Convert to it! — universal offline file converter",
+        "mimeType": "font/*;model/*;audio/midi;application/x-subrip;text/vtt;text/x-ssa;application/vnd.recordare.musicxml+xml",
+        "role": "Editor"
+      }
+    ]
+  }
+}
